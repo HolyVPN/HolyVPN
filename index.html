@@ -203,18 +203,6 @@
                 });
             }
 
-            function updateDirectionBasedOnTilt(event) {
-                const { beta, gamma } = event; // Наклон телефона по вертикали и горизонтали
-                const tiltX = gamma / 45; // Нормализуем значения (-45 до 45) в диапазон от -1 до 1
-                const tiltY = beta / 45;
-
-                const stars = svg.querySelectorAll('circle');
-                stars.forEach(star => {
-                    star.directionX += tiltX * 0.05; // Уменьшаем влияние для плавности
-                    star.directionY += tiltY * 0.05;
-                });
-            }
-
             setCanvasSize();
             window.addEventListener('resize', () => {
                 setCanvasSize();
@@ -224,7 +212,6 @@
             drawStars();
             animateStars();
             window.addEventListener('mousemove', repelStars);
-            window.addEventListener('deviceorientation', updateDirectionBasedOnTilt);
         });
     </script>
 </head>
