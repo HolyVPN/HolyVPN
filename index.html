@@ -10,7 +10,7 @@
         html {
             overflow: hidden;
         }
-        body, svg {
+        body {
             padding: 0;
             margin: 0;
             border: 0;
@@ -19,9 +19,20 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #fff;
             font-family: monospace;
             flex-direction: column;
+        }
+        svg, #typing-container, #click-to-join, #footer-container {
+            opacity: 0;
+            animation: fade-in-elements 1.5s ease-in-out forwards;
+        }
+        @keyframes fade-in-elements {
+            0% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
         }
         #svg {
             position: absolute;
@@ -39,6 +50,8 @@
             z-index: 1;
             text-align: center;
             text-shadow: 0px 0px 20px rgba(255, 255, 255, 0.7);
+            animation-delay: 0.5s;
+            color: #fff;
         }
         #click-to-join {
             margin-top: 60px;
@@ -50,6 +63,7 @@
             display: inline-block;
             position: relative;
             transition: all 0.3s ease-in-out;
+            animation-delay: 1s;
         }
         #click-to-join:hover {
             text-shadow: 0 0 10px #ffffff;
@@ -71,6 +85,7 @@
             margin-top: auto;
             text-align: center;
             padding-bottom: 20px;
+            animation-delay: 1.5s;
         }
         #footer-text {
             font-size: 1.5em;
@@ -96,6 +111,35 @@
                 font-size: 1em;
             }
         }
+        body::before, body::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            width: 10%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+        body::before {
+            left: 0;
+            background: linear-gradient(to right, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0));
+            animation: fade-blur 1.5s ease-in-out forwards;
+        }
+        body::after {
+            right: 0;
+            background: linear-gradient(to left, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0));
+            animation: fade-blur 1.5s ease-in-out forwards;
+        }
+        @keyframes fade-blur {
+            0% {
+                filter: blur(10px);
+                opacity: 0;
+            }
+            100% {
+                filter: blur(0);
+                opacity: 1;
+            }
+        }
     </style>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -105,8 +149,8 @@
                 "Your Privacy Matter."
             ];
             const typingElement = document.getElementById('typing-effect');
-            let i = 0, j = 0, isDeleting = false;
-            const maxSpeed = 1.5; // Максимальная скорость движения звёзд
+            let i = 0, j = 0, isDeleting = false, isFirstDelete = true;
+            const maxSpeed = 0.20; // Уменьшенная максимальная скорость движения звёзд для более плавного движения
 
             function type() {
                 const currentPhrase = phrases[i % phrases.length];
@@ -114,7 +158,9 @@
                 typingElement.innerText = currentText;
 
                 if (!isDeleting && j === currentPhrase.length) {
-                    setTimeout(() => isDeleting = true, 2000);
+                    setTimeout(() => {
+                    isDeleting = true;
+                }, 4000);
                 } else if (isDeleting && j === 0) {
                     isDeleting = false;
                     i++;
@@ -123,7 +169,7 @@
                 setTimeout(type, speed);
             }
             type();
-
+            
             const joinLink = document.getElementById('click-to-join');
             if (joinLink) {
                 joinLink.style.position = 'absolute';
@@ -132,8 +178,9 @@
                 joinLink.style.transform = 'translateX(-50%)'; 
                 joinLink.addEventListener('click', () => {
                     window.open('https://t.me/team_holy', '_blank');
-                });
-            }
+
+            });
+        }
 
             const svgNS = "http://www.w3.org/2000/svg";
             const svg = document.querySelector("#svg");
@@ -151,12 +198,12 @@
 
             function drawStars() {
                 svg.innerHTML = ""; 
-                const stars = 1000;
+                const stars = 250; 
                 for (let i = 0; i < stars; i++) {
                     let circle = document.createElementNS(svgNS, "circle");
                     let randomX = Math.random() * ViewportX;
                     let randomY = Math.random() * ViewportY;
-                    let randomR = Math.random() * 2.5;
+                    let randomR = Math.random() * 1.5;
                     setCoords(circle, randomX, randomY, "#fff", randomR);
                 }
             }
@@ -174,8 +221,20 @@
                     x += Math.min(Math.max(star.directionX, -maxSpeed), maxSpeed);
                     y += Math.min(Math.max(star.directionY, -maxSpeed), maxSpeed);
 
-                    if (x < 0 || x > ViewportX) star.directionX *= -1;
-                    if (y < 0 || y > ViewportY) star.directionY *= -1;
+                    const fadeMargin = ViewportX * 0.15;
+                    if (x < fadeMargin || x > ViewportX - fadeMargin) {
+                        star.setAttribute('opacity', Math.max(0, 1 - Math.abs(x < fadeMargin ? (fadeMargin - x) : (x - (ViewportX - fadeMargin))) / fadeMargin));
+                    } else {
+                        star.setAttribute('opacity', 1);
+                    }
+
+                    if (y < 0 || y > ViewportY) {
+                        star.directionY *= -1;
+                    }
+
+                    if (x < 0 || x > ViewportX) {
+                        star.directionX *= -1;
+                    }
 
                     star.setAttribute('cx', x);
                     star.setAttribute('cy', y);
@@ -194,8 +253,8 @@
                     const dy = y - mouseY;
                     const distance = Math.sqrt(dx * dx + dy * dy);
 
-                    if (distance < 100) {
-                        const force = (100 - distance) / 200;
+                    if (distance < 75) {
+                        const force = (100 - distance) / 250;
                         const angle = Math.atan2(dy, dx);
                         star.directionX += Math.cos(angle) * force;
                         star.directionY += Math.sin(angle) * force;
