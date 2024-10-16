@@ -146,11 +146,10 @@
             const phrases = [
                 "Holy VPN", 
                 "Our Religion - Freedom and lack of censorship.", 
-                "Your Privacy Matter."
+                "Your Privacy Matters."
             ];
             const typingElement = document.getElementById('typing-effect');
             let i = 0, j = 0, isDeleting = false, isFirstDelete = true;
-            const maxSpeed = 0.20; // Уменьшенная максимальная скорость движения звёзд для более плавного движения
 
             function type() {
                 const currentPhrase = phrases[i % phrases.length];
@@ -159,17 +158,19 @@
 
                 if (!isDeleting && j === currentPhrase.length) {
                     setTimeout(() => {
-                    isDeleting = true;
-                }, 4000);
+                        isDeleting = true;
+                        isFirstDelete = false;
+                    }, isFirstDelete ? 4000 : 2000);  
                 } else if (isDeleting && j === 0) {
                     isDeleting = false;
                     i++;
                 }
-                const speed = isDeleting ? 40 : 50;
+                
+                const speed = isDeleting ? (isFirstDelete ? 40 : 20) : 50;  
                 setTimeout(type, speed);
             }
+
             type();
-            
             const joinLink = document.getElementById('click-to-join');
             if (joinLink) {
                 joinLink.style.position = 'absolute';
@@ -178,13 +179,12 @@
                 joinLink.style.transform = 'translateX(-50%)'; 
                 joinLink.addEventListener('click', () => {
                     window.open('https://t.me/team_holy', '_blank');
-
-            });
-        }
-
+                });
+            }
             const svgNS = "http://www.w3.org/2000/svg";
             const svg = document.querySelector("#svg");
             let ViewportX = window.innerWidth, ViewportY = window.innerHeight;
+            const maxSpeed = 0.10;
 
             function setCoords(circle, rX, rY, fill, r) {
                 circle.setAttribute("cx", rX);
@@ -253,8 +253,8 @@
                     const dy = y - mouseY;
                     const distance = Math.sqrt(dx * dx + dy * dy);
 
-                    if (distance < 75) {
-                        const force = (100 - distance) / 250;
+                    if (distance < 45) {  
+                        const force = (100 - distance) / 30;  
                         const angle = Math.atan2(dy, dx);
                         star.directionX += Math.cos(angle) * force;
                         star.directionY += Math.sin(angle) * force;
@@ -270,12 +270,12 @@
 
             drawStars();
             animateStars();
-            window.addEventListener('mousemove', repelStars);
+            window.addEventListener('mousemove', repelStars);  
         });
     </script>
 </head>
 <body>
-    <div id="typing-container">
+   <div id="typing-container">
         <h1 id="typing-effect"></h1>
     </div>
     <div id="click-to-join" class="join-link">Click to join</div>
